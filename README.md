@@ -1,37 +1,41 @@
-# 🦅 ProConnect Messenger
+# 🦅 ProConnect Messenger - Ultra Secured Edition
 
-**ProConnect** is a secure, professional-grade real-time messaging web application. Built with a focus on high performance and "Blue Team" defense, it is designed to run efficiently on mobile devices with limited resources (4GB RAM) without sacrificing security.
+**ProConnect** is a professional-grade, real-time messaging platform architected for "Blue Team" defense. This "Ultra-Secured" version implements enterprise-level security protocols, including client-side end-to-end encryption and a modular security management system.
 
----
-
-## 🛡️ Security Audit & "Hacker" Mindset
-As a developer with a background in cybersecurity, I built ProConnect with a **Security-First** approach. Unlike standard "Test Mode" apps, ProConnect features:
-
-* **Custom Firestore Security Rules**: Granular access control prevents unauthorized database wipes or data snooping.
-* **Packet Isolation**: Users can only read or write to chat rooms where their `UID` is explicitly listed in the `participants` array.
-* **Identity Guard**: Only authenticated owners can modify their profile metadata (Email/UID/ShareCode).
-* **XSS Mitigation**: Leverages React's built-in sanitization to prevent stored XSS attacks via chat inputs.
+> **Hacker's Note:** This entire project was developed on a **mobile device (4GB RAM)**, proving that high-security software doesn't require high-end hardware.
 
 ---
 
-## 🚀 Features
-* **Email Discovery**: Find and add friends directly via their professional email address.
-* **Real-time Communication**: Instant message delivery powered by Firebase Firestore `onSnapshot` listeners.
-* **Lean Architecture**: Zero external image dependencies. Uses SVG icons and the UI-Avatars API to save bandwidth and device memory.
-* **Native Share Integration**: Uses the Web Share API for a seamless mobile "Invite Friend" experience.
-* **Mobile Optimized**: Responsive design that toggles between sidebar and chat views for a native-app feel.
+## 🛡️ "Fort Knox" Security Architecture
+Unlike standard messaging apps, ProConnect utilizes a custom-built **SecurityManager** class to handle all defensive operations:
+
+* **End-to-End Encryption (E2EE)**: Messages are encrypted with **AES-256** using CryptoJS before they leave the device. Even the database only sees scrambled ciphertext.
+* **Brute Force Defense**: Implements an automatic account lockout system after 5 failed attempts with a 15-minute cooldown period.
+* **Intelligent Rate Limiting**: Throttles user requests (max 30 per minute) to mitigate spam and potential DDoS vectors.
+* **Advanced XSS & CSRF Protection**: All inputs are sanitized through a manual sanitization engine, and unique session tokens validate every state-changing request.
+* **Security Watermark**: A persistent UI indicator verifies the active ultra-secured status of the session.
 
 ---
 
-## 🛠️ Tech Stack
-* **Frontend**: React 18 (UMD), Tailwind CSS
-* **Backend**: Firebase v9 (Auth, Firestore)
-* **Language**: JavaScript (ES6+)
-* **Environment**: Mobile-First Development
+## 🚀 Key Features
+* **Encrypted Real-time Chat**: Instant delivery via Firebase Firestore with zero-knowledge storage.
+* **WebRTC Voice & Video**: Secure, peer-to-peer communication using DTLS-SRTP for media encryption.
+* **Smart Presence**: Securely tracks online/offline status and "Typing..." indicators without exposing user metadata.
+* **Security Dash (Admin)**: Hidden dashboard for authorized UIDs to monitor system-wide security metrics.
+* **Lean & Fast**: Optimized SVG architecture for low-memory (4GB RAM) mobile environments.
 
 ---
 
-## 📦 Installation & Setup
-1. Clone the repository:
+## 🛠️ Tech Stack & Defense Tools
+* **Encryption**: AES-256 (CryptoJS).
+* **Frontend**: React 18 (UMD), Tailwind CSS.
+* **Backend**: Firebase v9 (Auth, Firestore, Storage) with strictly hardened **Firestore Security Rules**.
+* **Environment**: Mobile-First Production Sprint.
+
+---
+
+## 📦 Installation & Audit
+1. View the live production app: [hayatkhan612.github.io/ProConnect-/](https://hayatkhan612.github.io/ProConnect-/)
+2. To audit the code locally:
    ```bash
-   git clone [https://hayatkhan612.github.io/ProConnect-/](https://hayatkhan612.github.io/ProConnect-/)
+   git clone [https://github.com/hayatkhan612/ProConnect-.git](https://github.com/hayatkhan612/ProConnect-.git)
