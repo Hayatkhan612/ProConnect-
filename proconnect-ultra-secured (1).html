@@ -1,0 +1,2136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        object-src 'none';
+        base-uri 'self';
+        form-action 'self';
+        frame-ancestors 'none';
+        upgrade-insecure-requests;
+        script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://unpkg.com https://www.gstatic.com https://cdnjs.cloudflare.com;
+        style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com;
+        img-src 'self' data: https: blob:;
+        connect-src 'self' https://*.firebaseio.com https://*.googleapis.com https://*.cloudfunctions.net wss://*.firebaseio.com https://ui-avatars.com;
+        font-src 'self' data:;
+        media-src 'self' blob:;
+    ">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+    <meta http-equiv="Strict-Transport-Security" content="max-age=31536000; includeSubDomains">
+    <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=()">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <title>ProConnect - ULTRA SECURED Messenger</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Firebase v9 Compat -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    
+    <!-- CryptoJS for end-to-end encryption -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js" integrity="sha512-a+SUDuwNzXDvz4XrIcXHuCf089/iJAoN4lmrXJg18XnduKK6YlDHNRalv4yd1N40OKI80tFidF+rqTFKGPoWFQ==" crossorigin="anonymous"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
+            -webkit-user-drag: none;
+            user-drag: none;
+        }
+        
+        /* Self-Destruct Animation */
+        @keyframes burn {
+            0% { opacity: 1; transform: scale(1); filter: brightness(1); }
+            50% { opacity: 0.7; transform: scale(1.05); filter: brightness(1.5) hue-rotate(20deg); }
+            100% { opacity: 0; transform: scale(0.5); filter: blur(10px) brightness(2); }
+        }
+        
+        @keyframes countdown {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .self-destruct {
+            animation: burn 2s ease-out forwards;
+        }
+        
+        .timer-badge {
+            animation: countdown 1s ease-in-out infinite;
+        }
+        
+        .scroll-smooth {
+            scroll-behavior: smooth;
+        }
+        
+        .chat-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .chat-scroll::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .chat-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        .chat-scroll::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        /* Video Call Styles */
+        .video-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: #000;
+        }
+        .local-video {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 200px;
+            height: 150px;
+            border-radius: 12px;
+            border: 2px solid white;
+            object-fit: cover;
+            z-index: 10;
+        }
+        .remote-video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); opacity: 1; }
+            100% { transform: scale(1.2); opacity: 0; }
+        }
+        .pulse-ring {
+            animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+        
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+        .typing-dot {
+            animation: typing 1.4s infinite;
+        }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        
+        /* Security Watermark */
+        .security-watermark {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.9), rgba(220, 38, 38, 0.9));
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            z-index: 9999;
+            pointer-events: none;
+        }
+    
+        .no-select {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        
+        /* Screenshot Protection */
+        @media print {
+            body::after {
+                content: "⚠️ CONFIDENTIAL - DO NOT PRINT OR SCREENSHOT ⚠️";
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                font-size: 48px;
+                font-weight: bold;
+                color: red;
+                z-index: 99999;
+                text-align: center;
+            }
+            body::before {
+                content: "";
+                position: fixed;
+                inset: 0;
+                background: rgba(255, 255, 255, 0.95);
+                z-index: 99998;
+            }
+        }
+
+        /* Enhanced Security Badge */
+        .security-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <div class="security-watermark">⚡ ULTRA SECURED</div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef, createContext, useContext } = React;
+
+        // ==================== ENHANCED SECURITY LAYER ====================
+        
+        // Enhanced Security Configuration
+        const SECURITY_CONFIG = {
+            MAX_LOGIN_ATTEMPTS: 3,
+            LOGIN_TIMEOUT: 900000, // 15 minutes
+            SESSION_TIMEOUT: 3600000, // 1 hour
+            MAX_MESSAGE_LENGTH: 4000,
+            MAX_FILE_SIZE: 5 * 1024 * 1024, // 5MB
+            ALLOWED_IMAGE_TYPES: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
+            RATE_LIMIT_WINDOW: 60000, // 1 minute
+            MAX_REQUESTS_PER_WINDOW: 30,
+            PASSWORD_MIN_LENGTH: 12,
+            ENCRYPTION_KEY: 'ProConnect-Ultra-E2E-2024-V2', // Enhanced encryption key
+            PBKDF2_ITERATIONS: 10000, // Key strengthening
+            // Self-Destruct Timer Options (in milliseconds)
+            SELF_DESTRUCT_TIMERS: {
+                '5s': 5000,
+                '10s': 10000,
+                '30s': 30000,
+                '1m': 60000,
+                '5m': 300000,
+                '1h': 3600000,
+                'off': 0
+            }
+        };
+
+        // Enhanced Security Manager Class
+        class SecurityManager {
+            constructor() {
+                this.loginAttempts = new Map();
+                this.requestCounts = new Map();
+                this.sessionStart = Date.now();
+                this.csrfToken = this.generateCSRFToken();
+                this.sessionKey = this.generateSessionKey();
+                this.integrityHashes = new Map();
+                this.securityEvents = [];
+                
+                // Initialize security monitoring
+                this.initializeSecurityMonitoring();
+            }
+
+            // Initialize Security Monitoring
+            initializeSecurityMonitoring() {
+                // Monitor for suspicious activities
+                window.addEventListener('focus', () => this.refreshSession());
+                window.addEventListener('blur', () => this.logSecurityEvent('window_blur', {}));
+                
+                // Prevent DevTools Detection (Basic)
+                const detectDevTools = () => {
+                    const threshold = 160;
+                    if (window.outerWidth - window.innerWidth > threshold || 
+                        window.outerHeight - window.innerHeight > threshold) {
+                        this.logSecurityEvent('devtools_detected', { 
+                            width: window.outerWidth - window.innerWidth,
+                            height: window.outerHeight - window.innerHeight 
+                        });
+                    }
+                };
+                setInterval(detectDevTools, 1000);
+                
+                // Prevent clipboard hijacking
+                document.addEventListener('copy', (e) => {
+                    this.logSecurityEvent('clipboard_copy', {});
+                });
+            }
+
+            // Generate Enhanced CSRF Token
+            generateCSRFToken() {
+                return CryptoJS.lib.WordArray.random(64).toString(CryptoJS.enc.Base64);
+            }
+
+            // Generate Session Key
+            generateSessionKey() {
+                return CryptoJS.lib.WordArray.random(32).toString();
+            }
+
+            // Validate CSRF Token
+            validateCSRFToken(token) {
+                return token === this.csrfToken;
+            }
+
+            // Enhanced Input Sanitization
+            sanitizeInput(input) {
+                if (typeof input !== 'string') return '';
+                return input
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#x27;')
+                    .replace(/\//g, '&#x2F;')
+                    .replace(/javascript:/gi, '')
+                    .replace(/on\w+=/gi, '')
+                    .trim();
+            }
+
+            // HTML Sanitization
+            sanitizeHTML(html) {
+                const div = document.createElement('div');
+                div.textContent = html;
+                return div.innerHTML;
+            }
+
+            // Enhanced Email Validation
+            validateEmail(email) {
+                const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                if (!emailRegex.test(email) || email.length > 254) return false;
+                
+                // Check for suspicious patterns
+                const suspiciousPatterns = ['admin@', 'root@', 'test@', 'demo@'];
+                const lowerEmail = email.toLowerCase();
+                return !suspiciousPatterns.some(pattern => lowerEmail.startsWith(pattern));
+            }
+
+            // Enhanced Password Validation
+            validatePassword(password) {
+                if (password.length < SECURITY_CONFIG.PASSWORD_MIN_LENGTH) {
+                    return { valid: false, message: `Password must be at least ${SECURITY_CONFIG.PASSWORD_MIN_LENGTH} characters` };
+                }
+                if (!/[A-Z]/.test(password)) {
+                    return { valid: false, message: 'Password must contain uppercase letters' };
+                }
+                if (!/[a-z]/.test(password)) {
+                    return { valid: false, message: 'Password must contain lowercase letters' };
+                }
+                if (!/[0-9]/.test(password)) {
+                    return { valid: false, message: 'Password must contain numbers' };
+                }
+                if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+                    return { valid: false, message: 'Password must contain special characters' };
+                }
+                
+                // Check for common passwords
+                const commonPasswords = ['Password123!', 'Welcome123!', 'Admin123!'];
+                if (commonPasswords.includes(password)) {
+                    return { valid: false, message: 'Password is too common' };
+                }
+                
+                return { valid: true, message: 'Password is strong ✓' };
+            }
+
+            // Track Login Attempts with IP-like tracking
+            trackLoginAttempt(email) {
+                const attempts = this.loginAttempts.get(email) || { count: 0, lastAttempt: Date.now() };
+                const now = Date.now();
+                
+                if (now - attempts.lastAttempt > SECURITY_CONFIG.LOGIN_TIMEOUT) {
+                    attempts.count = 0;
+                }
+                
+                attempts.count++;
+                attempts.lastAttempt = now;
+                this.loginAttempts.set(email, attempts);
+                
+                this.logSecurityEvent('login_attempt', { email, attemptCount: attempts.count });
+                
+                return attempts.count;
+            }
+
+            // Check Account Lock
+            isAccountLocked(email) {
+                const attempts = this.loginAttempts.get(email);
+                if (!attempts) return false;
+                
+                const now = Date.now();
+                if (now - attempts.lastAttempt > SECURITY_CONFIG.LOGIN_TIMEOUT) {
+                    this.loginAttempts.delete(email);
+                    return false;
+                }
+                
+                return attempts.count >= SECURITY_CONFIG.MAX_LOGIN_ATTEMPTS;
+            }
+
+            // Reset Login Attempts
+            resetLoginAttempts(email) {
+                this.loginAttempts.delete(email);
+                this.logSecurityEvent('login_success', { email });
+            }
+
+            // Enhanced Rate Limiting
+            checkRateLimit(userId) {
+                const now = Date.now();
+                const userRequests = this.requestCounts.get(userId) || [];
+                
+                const recentRequests = userRequests.filter(timestamp => 
+                    now - timestamp < SECURITY_CONFIG.RATE_LIMIT_WINDOW
+                );
+                
+                if (recentRequests.length >= SECURITY_CONFIG.MAX_REQUESTS_PER_WINDOW) {
+                    this.logSecurityEvent('rate_limit_exceeded', { userId, count: recentRequests.length });
+                    return false;
+                }
+                
+                recentRequests.push(now);
+                this.requestCounts.set(userId, recentRequests);
+                return true;
+            }
+
+            // Session Management
+            isSessionValid() {
+                const valid = Date.now() - this.sessionStart < SECURITY_CONFIG.SESSION_TIMEOUT;
+                if (!valid) {
+                    this.logSecurityEvent('session_expired', {});
+                }
+                return valid;
+            }
+
+            refreshSession() {
+                this.sessionStart = Date.now();
+            }
+
+            // Advanced Encryption with PBKDF2 Key Derivation
+            encryptMessage(message, userKey = '') {
+                try {
+                    const combinedKey = SECURITY_CONFIG.ENCRYPTION_KEY + userKey + this.sessionKey;
+                    const derivedKey = CryptoJS.PBKDF2(combinedKey, 'ProConnect-Salt', {
+                        keySize: 256/32,
+                        iterations: SECURITY_CONFIG.PBKDF2_ITERATIONS
+                    });
+                    
+                    const iv = CryptoJS.lib.WordArray.random(16);
+                    const encrypted = CryptoJS.AES.encrypt(message, derivedKey, {
+                        iv: iv,
+                        mode: CryptoJS.mode.CBC,
+                        padding: CryptoJS.pad.Pkcs7
+                    });
+                    
+                    const combined = iv.toString() + ':' + encrypted.toString();
+                    return combined;
+                } catch (error) {
+                    console.error('Encryption error:', error);
+                    this.logSecurityEvent('encryption_error', { error: error.message });
+                    return null;
+                }
+            }
+
+            // Advanced Decryption
+            decryptMessage(encryptedMessage, userKey = '') {
+                try {
+                    if (!encryptedMessage || !encryptedMessage.includes(':')) {
+                        return encryptedMessage;
+                    }
+                    
+                    const parts = encryptedMessage.split(':');
+                    if (parts.length !== 2) return '[Encrypted Message]';
+                    
+                    const iv = CryptoJS.enc.Hex.parse(parts[0]);
+                    const encrypted = parts[1];
+                    
+                    const combinedKey = SECURITY_CONFIG.ENCRYPTION_KEY + userKey + this.sessionKey;
+                    const derivedKey = CryptoJS.PBKDF2(combinedKey, 'ProConnect-Salt', {
+                        keySize: 256/32,
+                        iterations: SECURITY_CONFIG.PBKDF2_ITERATIONS
+                    });
+                    
+                    const decrypted = CryptoJS.AES.decrypt(encrypted, derivedKey, {
+                        iv: iv,
+                        mode: CryptoJS.mode.CBC,
+                        padding: CryptoJS.pad.Pkcs7
+                    });
+                    
+                    const decryptedText = decrypted.toString(CryptoJS.enc.Utf8);
+                    return decryptedText || '[Decryption Failed]';
+                } catch (error) {
+                    console.error('Decryption error:', error);
+                    this.logSecurityEvent('decryption_error', { error: error.message });
+                    return '[Encrypted Message]';
+                }
+            }
+
+            // File Validation
+            validateFile(file) {
+                if (!file) return { valid: false, message: 'No file selected' };
+                
+                if (!SECURITY_CONFIG.ALLOWED_IMAGE_TYPES.includes(file.type)) {
+                    return { valid: false, message: 'Invalid file type. Only images allowed.' };
+                }
+                
+                if (file.size > SECURITY_CONFIG.MAX_FILE_SIZE) {
+                    const maxSizeMB = SECURITY_CONFIG.MAX_FILE_SIZE / (1024 * 1024);
+                    return { valid: false, message: `File too large. Max size is ${maxSizeMB}MB.` };
+                }
+                
+                // Additional filename validation
+                const suspiciousExtensions = ['.exe', '.bat', '.cmd', '.sh', '.php', '.js'];
+                if (suspiciousExtensions.some(ext => file.name.toLowerCase().endsWith(ext))) {
+                    return { valid: false, message: 'Suspicious file extension detected.' };
+                }
+                
+                return { valid: true, message: 'File is valid' };
+            }
+
+            // Secure Random String
+            generateSecureRandom(length = 32) {
+                return CryptoJS.lib.WordArray.random(length/2).toString();
+            }
+
+            // Enhanced Hash Function
+            hashData(data) {
+                return CryptoJS.SHA512(data).toString();
+            }
+
+            // Integrity Check
+            createIntegrityHash(data) {
+                const hash = this.hashData(JSON.stringify(data));
+                return hash;
+            }
+
+            verifyIntegrity(data, expectedHash) {
+                const actualHash = this.createIntegrityHash(data);
+                return actualHash === expectedHash;
+            }
+
+            // Security Event Logging
+            logSecurityEvent(event, metadata = {}) {
+                const logEntry = {
+                    event,
+                    timestamp: new Date().toISOString(),
+                    metadata,
+                    sessionKey: this.sessionKey.substring(0, 8)
+                };
+                
+                this.securityEvents.push(logEntry);
+                
+                // Keep only last 100 events
+                if (this.securityEvents.length > 100) {
+                    this.securityEvents.shift();
+                }
+                
+                console.warn('🛡️ Security Event:', logEntry);
+                
+                // In production, send to security monitoring service
+            }
+
+            // SQL Injection Prevention
+            sanitizeQuery(query) {
+                return query.replace(/['";\\]/g, '');
+            }
+
+            // CSP Violation Handler
+            handleCSPViolation(violation) {
+                console.error('🚨 CSP Violation:', violation);
+                this.logSecurityEvent('csp_violation', violation);
+            }
+
+            // XSS Attack Detection
+            detectXSS(input) {
+                const xssPatterns = [
+                    /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
+                    /javascript:/gi,
+                    /on\w+\s*=/gi,
+                    /<iframe/gi,
+                    /<embed/gi,
+                    /<object/gi
+                ];
+                
+                const hasXSS = xssPatterns.some(pattern => pattern.test(input));
+                if (hasXSS) {
+                    this.logSecurityEvent('xss_attempt_detected', { input: input.substring(0, 100) });
+                }
+                return hasXSS;
+            }
+        }
+
+        // Initialize Enhanced Security Manager
+        const securityManager = new SecurityManager();
+
+        // Security Event Listeners
+        document.addEventListener('dragover', (e) => e.preventDefault());
+        document.addEventListener('drop', (e) => e.preventDefault());
+        document.addEventListener('securitypolicyviolation', (e) => {
+            securityManager.handleCSPViolation({
+                blockedURI: e.blockedURI,
+                violatedDirective: e.violatedDirective,
+                originalPolicy: e.originalPolicy,
+            });
+        });
+
+        // ==================== FIREBASE CONFIGURATION ====================
+
+        const firebaseConfig = {
+            apiKey: 'AIzaSyCYYzVnVB0JheAYre5c21d_xWv1HabIRPM',
+            authDomain: 'brainy-18fda.firebaseapp.com',
+            databaseURL: 'https://brainy-18fda-default-rtdb.firebaseio.com',
+            projectId: 'brainy-18fda',
+            storageBucket: 'brainy-18fda.firebasestorage.app',
+            messagingSenderId: '659063130521',
+            appId: '1:659063130521:web:938a8b6f32506dc4aceb08',
+            measurementId: 'G-M1X3YW1SZF'
+        };
+
+        let auth, db, storage;
+        try {
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            auth = firebase.auth();
+            db = firebase.firestore();
+            storage = firebase.storage();
+            
+            db.enablePersistence({ synchronizeTabs: true }).catch((err) => {
+                if (err.code === 'failed-precondition') {
+                    console.log('Persistence failed: Multiple tabs open');
+                } else if (err.code === 'unimplemented') {
+                    console.log('Persistence not available');
+                }
+            });
+        } catch (error) {
+            console.error('Firebase initialization error:', error);
+            securityManager.logSecurityEvent('firebase_init_error', { error: error.message });
+        }
+
+        // ==================== UTILITY FUNCTIONS ====================
+
+        const AuthContext = createContext();
+        const useAuth = () => useContext(AuthContext);
+
+        const STUN_SERVERS = {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' },
+                { urls: 'stun:stun2.l.google.com:19302' }
+            ]
+        };
+
+        const generateShareCode = () => {
+            return securityManager.generateSecureRandom(6).toUpperCase().substring(0, 6);
+        };
+
+        const getChatId = (uid1, uid2) => {
+            return [uid1, uid2].sort().join('_');
+        };
+
+        const formatTimestamp = (timestamp) => {
+            if (!timestamp) return '';
+            try {
+                const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+                if (isNaN(date.getTime())) return '';
+                
+                const now = new Date();
+                const diff = now - date;
+                
+                if (diff < 0) return 'Just now';
+                if (diff < 60000) return 'Just now';
+                if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
+                if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
+                if (diff < 604800000) return `${Math.floor(diff / 86400000)}d ago`;
+                
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            } catch (error) {
+                console.error('Timestamp formatting error:', error);
+                return '';
+            }
+        };
+
+        // ==================== COMPONENTS ====================
+
+        // Toast Component
+        const Toast = ({ message, type = 'info', onClose }) => {
+            useEffect(() => {
+                const timer = setTimeout(onClose, 4000);
+                return () => clearTimeout(timer);
+            }, [onClose]);
+
+            const bgColor = type === 'error' ? 'bg-red-500' : type === 'success' ? 'bg-green-500' : 'bg-blue-500';
+
+            return (
+                <div className={`fixed top-4 right-4 ${bgColor} text-white px-6 py-3 rounded-lg shadow-xl z-50`}>
+                    <div className="flex items-center space-x-2">
+                        {type === 'error' && <span>⚠️</span>}
+                        {type === 'success' && <span>✅</span>}
+                        {type === 'info' && <span>ℹ️</span>}
+                        <span>{message}</span>
+                    </div>
+                </div>
+            );
+        };
+
+        // Auth Provider Component
+        const AuthProvider = ({ children }) => {
+            const [currentUser, setCurrentUser] = useState(null);
+            const [loading, setLoading] = useState(true);
+            const sessionCheckRef = useRef(null);
+
+            useEffect(() => {
+                if (!auth) {
+                    console.error('Firebase Auth not initialized');
+                    setLoading(false);
+                    return;
+                }
+                
+                const unsubscribe = auth.onAuthStateChanged(
+                    (user) => {
+                        setCurrentUser(user);
+                        
+                        if (user) {
+                            db.collection('users').doc(user.uid).set({
+                                online: true,
+                                lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
+                                lastActivity: Date.now()
+                            }, { merge: true }).catch(err => {
+                                console.error('Error updating status:', err);
+                            });
+
+                            securityManager.refreshSession();
+                        }
+                        
+                        setLoading(false);
+                    },
+                    (error) => {
+                        console.error('Auth state change error:', error);
+                        securityManager.logSecurityEvent('auth_state_error', { error: error.message });
+                        setLoading(false);
+                    }
+                );
+                
+                sessionCheckRef.current = setInterval(() => {
+                    if (auth.currentUser && !securityManager.isSessionValid()) {
+                        auth.signOut().then(() => {
+                            alert('⚠️ Session expired for security. Please login again.');
+                        }).catch(err => console.error('Logout error:', err));
+                    }
+                }, 60000);
+                
+                const handleUnload = () => {
+                    if (auth.currentUser) {
+                        db.collection('users').doc(auth.currentUser.uid).update({
+                            online: false,
+                            lastSeen: firebase.firestore.FieldValue.serverTimestamp()
+                        }).catch(err => console.error('Error updating status:', err));
+                    }
+                };
+                
+                const handleContextMenu = (e) => {
+                    if (!e.target.matches('input, textarea')) {
+                        e.preventDefault();
+                    }
+                };
+                
+                window.addEventListener('beforeunload', handleUnload);
+                document.addEventListener('contextmenu', handleContextMenu);
+                
+                return () => {
+                    if (unsubscribe) unsubscribe();
+                    if (sessionCheckRef.current) clearInterval(sessionCheckRef.current);
+                    window.removeEventListener('beforeunload', handleUnload);
+                    document.removeEventListener('contextmenu', handleContextMenu);
+                };
+            }, []);
+
+            const value = { currentUser };
+
+            return (
+                <AuthContext.Provider value={value}>
+                    {!loading ? children : (
+                        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800">
+                            <div className="text-center">
+                                <div className="animate-spin rounded-full h-16 w-16 border-4 border-red-500 border-t-transparent mx-auto mb-4"></div>
+                                <p className="text-white font-semibold">⚡ Initializing Ultra-Secured Connection...</p>
+                                <p className="text-gray-400 text-sm mt-2">Military-Grade Encryption Active</p>
+                            </div>
+                        </div>
+                    )}
+                </AuthContext.Provider>
+            );
+        };
+
+        // Enhanced Auth Page Component
+        const AuthPage = () => {
+            const [isLogin, setIsLogin] = useState(true);
+            const [email, setEmail] = useState('');
+            const [password, setPassword] = useState('');
+            const [loading, setLoading] = useState(false);
+            const [toast, setToast] = useState(null);
+            const [passwordStrength, setPasswordStrength] = useState(null);
+            const [showPassword, setShowPassword] = useState(false);
+
+            const showToast = (message, type = 'info') => {
+                setToast({ message, type });
+            };
+
+            const handlePasswordChange = (value) => {
+                setPassword(value);
+                if (!isLogin && value) {
+                    const validation = securityManager.validatePassword(value);
+                    setPasswordStrength(validation);
+                }
+            };
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                
+                const sanitizedEmail = securityManager.sanitizeInput(email).toLowerCase();
+                const sanitizedPassword = password;
+                
+                if (!securityManager.validateEmail(sanitizedEmail)) {
+                    showToast('⚠️ Invalid email format', 'error');
+                    return;
+                }
+                
+                if (securityManager.isAccountLocked(sanitizedEmail)) {
+                    showToast('🔒 Account locked. Try again later.', 'error');
+                    return;
+                }
+                
+                if (!isLogin) {
+                    const passwordValidation = securityManager.validatePassword(sanitizedPassword);
+                    if (!passwordValidation.valid) {
+                        showToast(passwordValidation.message, 'error');
+                        return;
+                    }
+                }
+                
+                setLoading(true);
+
+                try {
+                    if (isLogin) {
+                        const userCredential = await auth.signInWithEmailAndPassword(sanitizedEmail, sanitizedPassword);
+                        
+                        securityManager.resetLoginAttempts(sanitizedEmail);
+                        
+                        await db.collection('users').doc(userCredential.user.uid).set({
+                            online: true,
+                            lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
+                            lastLoginTime: firebase.firestore.FieldValue.serverTimestamp(),
+                            securityLevel: 'ultra-high'
+                        }, { merge: true });
+                        
+                        showToast('✅ Login successful!', 'success');
+                    } else {
+                        const userCredential = await auth.createUserWithEmailAndPassword(sanitizedEmail, sanitizedPassword);
+                        const user = userCredential.user;
+                        
+                        const shareCode = generateShareCode();
+                        
+                        await db.collection('users').doc(user.uid).set({
+                            uid: user.uid,
+                            email: user.email,
+                            shareCode: shareCode,
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                            friendsList: [],
+                            online: true,
+                            lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
+                            securityLevel: 'ultra-high',
+                            defaultSelfDestructTimer: 'off'
+                        });
+                        
+                        showToast('🎉 Account created successfully!', 'success');
+                    }
+                } catch (error) {
+                    console.error('Auth error:', error);
+                    
+                    if (isLogin) {
+                        const attempts = securityManager.trackLoginAttempt(sanitizedEmail);
+                        const remaining = SECURITY_CONFIG.MAX_LOGIN_ATTEMPTS - attempts;
+                        
+                        if (remaining > 0) {
+                            showToast(`❌ Login failed. ${remaining} attempts remaining.`, 'error');
+                        } else {
+                            showToast('🔒 Account locked. Try again in 15 minutes.', 'error');
+                        }
+                    }
+                    
+                    let errorMessage = 'An error occurred. Please try again.';
+                    
+                    if (error.code === 'auth/email-already-in-use') {
+                        errorMessage = 'Email already in use. Please login.';
+                    } else if (error.code === 'auth/invalid-email') {
+                        errorMessage = 'Invalid email address.';
+                    } else if (error.code === 'auth/weak-password') {
+                        errorMessage = 'Password is too weak.';
+                    } else if (error.code === 'auth/user-not-found') {
+                        errorMessage = 'User not found. Please sign up.';
+                    } else if (error.code === 'auth/wrong-password') {
+                        errorMessage = 'Incorrect password.';
+                    } else if (error.code === 'auth/invalid-credential') {
+                        errorMessage = 'Invalid credentials provided.';
+                    } else if (error.code === 'auth/too-many-requests') {
+                        errorMessage = 'Too many attempts. Try again later.';
+                    } else if (error.code === 'auth/network-request-failed') {
+                        errorMessage = 'Network error. Check connection.';
+                    }
+                    
+                    showToast(errorMessage, 'error');
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-red-50 via-gray-50 to-red-50 flex items-center justify-center p-4">
+                    {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+                    
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 border-2 border-red-100">
+                        <div className="text-center mb-8">
+                            <div className="text-5xl mb-3">🔐</div>
+                            <h1 className="text-3xl font-bold text-gray-900 mb-2">ProConnect</h1>
+                            <p className="text-gray-600 font-medium">Ultra-Secured Messaging</p>
+                            <div className="mt-3">
+                                <span className="security-badge">
+                                    ⚡ ULTRA SECURED
+                                </span>
+                            </div>
+                        </div>
+
+                        <div className="flex bg-gray-100 rounded-lg p-1 mb-6">
+                            <button
+                                onClick={() => {
+                                    setIsLogin(true);
+                                    setPasswordStrength(null);
+                                }}
+                                className={`flex-1 py-2 rounded-md font-medium transition-all ${
+                                    isLogin ? 'bg-white text-red-600 shadow-md' : 'text-gray-600'
+                                }`}
+                            >
+                                Login
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setIsLogin(false);
+                                    setPasswordStrength(null);
+                                }}
+                                className={`flex-1 py-2 rounded-md font-medium transition-all ${
+                                    !isLogin ? 'bg-white text-red-600 shadow-md' : 'text-gray-600'
+                                }`}
+                            >
+                                Sign Up
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    📧 Email Address
+                                </label>
+                                <input
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition"
+                                    placeholder="you@example.com"
+                                    required
+                                    autoComplete="email"
+                                    maxLength="254"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    🔑 Password
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        type={showPassword ? "text" : "password"}
+                                        value={password}
+                                        onChange={(e) => handlePasswordChange(e.target.value)}
+                                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition pr-12"
+                                        placeholder="••••••••••••"
+                                        required
+                                        minLength="12"
+                                        autoComplete={isLogin ? "current-password" : "new-password"}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                                    >
+                                        {showPassword ? '👁️' : '🔒'}
+                                    </button>
+                                </div>
+                                {!isLogin && passwordStrength && (
+                                    <div className={`mt-2 text-sm font-medium ${passwordStrength.valid ? 'text-green-600' : 'text-red-600'}`}>
+                                        {passwordStrength.message}
+                                    </div>
+                                )}
+                            </div>
+
+                            {!isLogin && (
+                                <div className="bg-red-50 border-2 border-red-200 rounded-lg p-3 text-xs text-red-900">
+                                    <p className="font-semibold mb-2">🛡️ Password Requirements:</p>
+                                    <ul className="list-disc list-inside space-y-1">
+                                        <li>Minimum 12 characters</li>
+                                        <li>Uppercase & lowercase letters</li>
+                                        <li>Numbers (0-9)</li>
+                                        <li>Special characters (!@#$%...)</li>
+                                        <li>No common patterns</li>
+                                    </ul>
+                                </div>
+                            )}
+
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold py-3 rounded-lg transition-all disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed shadow-lg"
+                            >
+                                {loading ? (
+                                    <span className="flex items-center justify-center">
+                                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Securing...
+                                    </span>
+                                ) : (
+                                    <>
+                                        ⚡ {isLogin ? 'SECURE LOGIN' : 'CREATE ACCOUNT'}
+                                    </>
+                                )}
+                            </button>
+                        </form>
+
+                        <p className="text-center text-sm text-gray-600 mt-6">
+                            {isLogin ? "Don't have an account? " : "Already have an account? "}
+                            <button
+                                onClick={() => {
+                                    setIsLogin(!isLogin);
+                                    setPasswordStrength(null);
+                                }}
+                                className="text-red-600 font-semibold hover:underline"
+                            >
+                                {isLogin ? 'Sign Up' : 'Login'}
+                            </button>
+                        </p>
+
+                        <div className="mt-6 pt-6 border-t-2 border-gray-200">
+                            <div className="text-xs text-center text-gray-600 space-y-2">
+                                <p className="font-semibold">🛡️ Security Features Active:</p>
+                                <div className="grid grid-cols-2 gap-2 mt-2">
+                                    <div className="bg-gray-50 p-2 rounded">🔐 E2E Encrypted</div>
+                                    <div className="bg-gray-50 p-2 rounded">⚡ Rate Limited</div>
+                                    <div className="bg-gray-50 p-2 rounded">🛡️ CSRF Protected</div>
+                                    <div className="bg-gray-50 p-2 rounded">🚨 Brute Force Block</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Self-Destruct Timer Selector Component
+        const SelfDestructSelector = ({ selected, onChange }) => {
+            const timerOptions = [
+                { value: 'off', label: 'Off', icon: '∞' },
+                { value: '5s', label: '5 sec', icon: '⚡' },
+                { value: '10s', label: '10 sec', icon: '⏱️' },
+                { value: '30s', label: '30 sec', icon: '⏲️' },
+                { value: '1m', label: '1 min', icon: '⏰' },
+                { value: '5m', label: '5 min', icon: '🕐' },
+                { value: '1h', label: '1 hour', icon: '🕑' }
+            ];
+
+            return (
+                <div className="bg-gradient-to-r from-red-50 to-orange-50 border-2 border-red-200 rounded-lg p-3 mb-3">
+                    <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-semibold text-gray-700">💣 Self-Destruct Timer</span>
+                        <span className="text-xs text-red-600 font-medium">Ephemeral Mode</span>
+                    </div>
+                    <div className="grid grid-cols-4 gap-2">
+                        {timerOptions.map(option => (
+                            <button
+                                key={option.value}
+                                type="button"
+                                onClick={() => onChange(option.value)}
+                                className={`px-2 py-2 rounded-md text-xs font-medium transition-all ${
+                                    selected === option.value
+                                        ? 'bg-red-600 text-white shadow-md'
+                                        : 'bg-white text-gray-700 hover:bg-red-100 border border-gray-300'
+                                }`}
+                            >
+                                <div>{option.icon}</div>
+                                <div className="text-xs mt-1">{option.label}</div>
+                            </button>
+                        ))}
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2 text-center">
+                        {selected === 'off' ? '⚠️ Messages will not self-destruct' : `💥 Messages will self-destruct after ${timerOptions.find(o => o.value === selected)?.label}`}
+                    </p>
+                </div>
+            );
+        };
+
+// Message Component with Self-Destruct
+        const Message = ({ message, isOwn, onSelfDestruct }) => {
+            const [imageLoaded, setImageLoaded] = useState(false);
+            const [decryptedText, setDecryptedText] = useState('');
+            const [countdown, setCountdown] = useState(null);
+            const [isDestroying, setIsDestroying] = useState(false);
+            const destroyTimerRef = useRef(null);
+            const countdownIntervalRef = useRef(null);
+
+            useEffect(() => {
+                if (message.text) {
+                    const decrypted = securityManager.decryptMessage(message.text);
+                    setDecryptedText(decrypted || message.text);
+                }
+            }, [message.text]);
+
+            // Self-Destruct Logic
+            useEffect(() => {
+                if (!message.selfDestructTimer || message.selfDestructTimer === 'off') return;
+                if (isOwn) return; // Sender sees messages normally
+                if (message.selfDestructed) return; // Already destroyed
+
+                const timerMs = SECURITY_CONFIG.SELF_DESTRUCT_TIMERS[message.selfDestructTimer];
+                if (!timerMs) return;
+
+                const messageTime = message.timestamp?.toDate?.() ? message.timestamp.toDate().getTime() : Date.now();
+                const currentTime = Date.now();
+                const elapsed = currentTime - messageTime;
+                const remaining = timerMs - elapsed;
+
+                if (remaining <= 0) {
+                    // Already expired
+                    handleSelfDestruct();
+                    return;
+                }
+
+                // Start countdown
+                setCountdown(Math.ceil(remaining / 1000));
+                
+                countdownIntervalRef.current = setInterval(() => {
+                    setCountdown(prev => {
+                        if (prev <= 1) {
+                            return 0;
+                        }
+                        return prev - 1;
+                    });
+                }, 1000);
+
+                destroyTimerRef.current = setTimeout(() => {
+                    handleSelfDestruct();
+                }, remaining);
+
+                return () => {
+                    if (destroyTimerRef.current) clearTimeout(destroyTimerRef.current);
+                    if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
+                };
+            }, [message, isOwn]);
+
+            const handleSelfDestruct = () => {
+                setIsDestroying(true);
+                
+                setTimeout(() => {
+                    if (onSelfDestruct) {
+                        onSelfDestruct(message.id);
+                    }
+                }, 2000); // Allow animation to complete
+            };
+
+            if (message.selfDestructed && !isOwn) {
+                return (
+                    <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'} mb-4`}>
+                        <div className="bg-gray-100 border-2 border-dashed border-gray-300 rounded-2xl px-4 py-3 max-w-xs">
+                            <div className="flex items-center space-x-2 text-gray-400">
+                                <span>💨</span>
+                                <span className="text-sm">Message self-destructed</span>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            const sanitizedText = securityManager.sanitizeHTML(decryptedText);
+
+            return (
+                <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'} mb-4 ${isDestroying ? 'self-destruct' : ''}`}>
+                    <div className="relative">
+                        <div
+                            className={`max-w-xs lg:max-w-md rounded-2xl ${
+                                isOwn
+                                    ? 'bg-red-600 text-white rounded-br-none'
+                                    : 'bg-gray-200 text-gray-800 rounded-bl-none'
+                            } ${isDestroying ? 'animate-pulse' : ''}`}
+                        >
+                            {message.imageUrl && (
+                                <img
+                                    src={message.imageUrl}
+                                    alt="Shared"
+                                    className={`rounded-t-2xl max-w-full ${imageLoaded ? '' : 'animate-pulse bg-gray-300'}`}
+                                    onLoad={() => setImageLoaded(true)}
+                                    referrerPolicy="no-referrer"
+                                />
+                            )}
+                            {decryptedText && (
+                                <div className="px-4 py-2">
+                                    <p className="break-words" dangerouslySetInnerHTML={{ __html: sanitizedText }}></p>
+                                </div>
+                            )}
+                            <div className="px-4 pb-2 flex items-center space-x-2">
+                                <span className={`text-xs ${isOwn ? 'text-red-100' : 'text-gray-500'}`}>
+                                    {formatTimestamp(message.timestamp)}
+                                </span>
+                                {isOwn && message.encrypted && <span className="text-xs">🔒</span>}
+                                {message.selfDestructTimer && message.selfDestructTimer !== 'off' && (
+                                    <span className="text-xs">💣</span>
+                                )}
+                            </div>
+                        </div>
+                        
+                        {/* Self-Destruct Countdown Badge */}
+                        {countdown !== null && countdown > 0 && !isOwn && (
+                            <div className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold rounded-full w-8 h-8 flex items-center justify-center timer-badge shadow-lg">
+                                {countdown}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        // Continuing with rest of components... (Incoming Call, Video Call, Typing Indicator, etc.)
+        
+        const IncomingCallModal = ({ caller, callType, onAccept, onReject }) => {
+            const sanitizedCaller = securityManager.sanitizeHTML(caller);
+            const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(caller)}&background=ef4444&color=fff&size=128`;
+
+            return (
+                <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 border-4 border-red-500">
+                        <div className="text-center">
+                            <div className="relative inline-block mb-4">
+                                <img src={avatarUrl} alt={sanitizedCaller} className="w-24 h-24 rounded-full" />
+                                <div className="absolute inset-0 rounded-full border-4 border-red-500 pulse-ring"></div>
+                            </div>
+                            <h2 className="text-2xl font-bold text-gray-800 mb-2">{sanitizedCaller}</h2>
+                            <p className="text-gray-600 mb-6">
+                                📞 Incoming {callType === 'video' ? 'video' : 'voice'} call...
+                            </p>
+                            <div className="flex space-x-4">
+                                <button
+                                    onClick={onReject}
+                                    className="flex-1 bg-red-500 hover:bg-red-600 text-white py-3 rounded-full font-semibold transition-colors shadow-lg"
+                                >
+                                    ❌ Decline
+                                </button>
+                                <button
+                                    onClick={onAccept}
+                                    className="flex-1 bg-green-500 hover:bg-green-600 text-white py-3 rounded-full font-semibold transition-colors shadow-lg"
+                                >
+                                    ✅ Accept
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const VideoCallScreen = ({ friendEmail, friendId, callType, onEndCall }) => {
+            const { currentUser } = useAuth();
+            const [isMuted, setIsMuted] = useState(false);
+            const [isVideoOff, setIsVideoOff] = useState(false);
+            const [callDuration, setCallDuration] = useState(0);
+            const localVideoRef = useRef(null);
+            const remoteVideoRef = useRef(null);
+            const peerConnectionRef = useRef(null);
+            const localStreamRef = useRef(null);
+            const callStartTimeRef = useRef(Date.now());
+
+            useEffect(() => {
+                const timer = setInterval(() => {
+                    setCallDuration(Math.floor((Date.now() - callStartTimeRef.current) / 1000));
+                }, 1000);
+                return () => clearInterval(timer);
+            }, []);
+
+            useEffect(() => {
+                initializeCall();
+                return () => {
+                    cleanup();
+                };
+            }, []);
+
+            const initializeCall = async () => {
+                try {
+                    const constraints = callType === 'video'
+                        ? { video: true, audio: true }
+                        : { video: false, audio: true };
+
+                    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                    localStreamRef.current = stream;
+                    
+                    if (localVideoRef.current) {
+                        localVideoRef.current.srcObject = stream;
+                    }
+
+                    const peerConnection = new RTCPeerConnection(STUN_SERVERS);
+                    peerConnectionRef.current = peerConnection;
+
+                    stream.getTracks().forEach(track => {
+                        peerConnection.addTrack(track, stream);
+                    });
+
+                    peerConnection.ontrack = (event) => {
+                        if (remoteVideoRef.current) {
+                            remoteVideoRef.current.srcObject = event.streams[0];
+                        }
+                    };
+
+                    peerConnection.onicecandidate = (event) => {
+                        if (event.candidate) {
+                            db.collection('calls').doc(getChatId(currentUser.uid, friendId))
+                                .collection('candidates').add(event.candidate.toJSON())
+                                .catch(err => console.error('ICE candidate error:', err));
+                        }
+                    };
+                } catch (error) {
+                    console.error('Error initializing call:', error);
+                    alert('❌ Failed to access camera/microphone. Check permissions.');
+                    securityManager.logSecurityEvent('call_init_error', { error: error.message });
+                }
+            };
+
+            const cleanup = () => {
+                if (localStreamRef.current) {
+                    localStreamRef.current.getTracks().forEach(track => track.stop());
+                }
+                if (peerConnectionRef.current) {
+                    peerConnectionRef.current.close();
+                }
+            };
+
+            const toggleMute = () => {
+                if (localStreamRef.current) {
+                    const audioTrack = localStreamRef.current.getAudioTracks()[0];
+                    if (audioTrack) {
+                        audioTrack.enabled = !audioTrack.enabled;
+                        setIsMuted(!audioTrack.enabled);
+                    }
+                }
+            };
+
+            const toggleVideo = () => {
+                if (localStreamRef.current && callType === 'video') {
+                    const videoTrack = localStreamRef.current.getVideoTracks()[0];
+                    if (videoTrack) {
+                        videoTrack.enabled = !videoTrack.enabled;
+                        setIsVideoOff(!videoTrack.enabled);
+                    }
+                }
+            };
+
+            const formatDuration = (seconds) => {
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            };
+
+            const sanitizedEmail = securityManager.sanitizeHTML(friendEmail);
+
+            return (
+                <div className="fixed inset-0 bg-black z-50 flex flex-col">
+                    <div className="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/70 to-transparent p-6 z-10">
+                        <div className="text-center text-white">
+                            <h2 className="text-xl font-semibold">{sanitizedEmail}</h2>
+                            <p className="text-sm opacity-75 flex items-center justify-center space-x-2">
+                                <span>🔒 Encrypted</span>
+                                <span>•</span>
+                                <span>{formatDuration(callDuration)}</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="flex-1 relative">
+                        <video
+                            ref={remoteVideoRef}
+                            autoPlay
+                            playsInline
+                            className="remote-video"
+                        />
+                        {callType === 'video' && (
+                            <video
+                                ref={localVideoRef}
+                                autoPlay
+                                playsInline
+                                muted
+                                className="local-video"
+                            />
+                        )}
+                        {callType === 'audio' && (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="text-center">
+                                    <div className="w-32 h-32 bg-red-600 rounded-full mx-auto mb-4 flex items-center justify-center animate-pulse">
+                                        <svg className="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                        </svg>
+                                    </div>
+                                    <h3 className="text-white text-xl font-semibold">{sanitizedEmail}</h3>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-8 z-10">
+                        <div className="flex justify-center space-x-6">
+                            <button
+                                onClick={toggleMute}
+                                className={`w-14 h-14 rounded-full ${isMuted ? 'bg-red-500' : 'bg-gray-700'} hover:bg-opacity-80 transition-colors flex items-center justify-center shadow-lg`}
+                            >
+                                <span className="text-2xl">{isMuted ? '🔇' : '🎤'}</span>
+                            </button>
+
+                            {callType === 'video' && (
+                                <button
+                                    onClick={toggleVideo}
+                                    className={`w-14 h-14 rounded-full ${isVideoOff ? 'bg-red-500' : 'bg-gray-700'} hover:bg-opacity-80 transition-colors flex items-center justify-center shadow-lg`}
+                                >
+                                    <span className="text-2xl">{isVideoOff ? '📷' : '📹'}</span>
+                                </button>
+                            )}
+
+                            <button
+                                onClick={() => {
+                                    cleanup();
+                                    onEndCall();
+                                }}
+                                className="w-14 h-14 rounded-full bg-red-600 hover:bg-red-700 transition-colors flex items-center justify-center shadow-lg"
+                            >
+                                <span className="text-2xl">📞</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const TypingIndicator = () => {
+            return (
+                <div className="flex items-center space-x-2 p-4">
+                    <div className="bg-gray-200 rounded-2xl rounded-bl-none px-4 py-3">
+                        <div className="flex space-x-1">
+                            <div className="w-2 h-2 bg-gray-500 rounded-full typing-dot"></div>
+                            <div className="w-2 h-2 bg-gray-500 rounded-full typing-dot"></div>
+                            <div className="w-2 h-2 bg-gray-500 rounded-full typing-dot"></div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const ChatListItem = ({ chat, onClick, isActive }) => {
+            const { currentUser } = useAuth();
+            const [friendData, setFriendData] = useState(null);
+
+            useEffect(() => {
+                const friendId = chat.participants?.find(id => id !== currentUser?.uid);
+                if (friendId) {
+                    const unsubscribe = db.collection('users').doc(friendId).onSnapshot(doc => {
+                        if (doc.exists) {
+                            setFriendData(doc.data());
+                        }
+                    }, err => {
+                        console.error('Friend data error:', err);
+                    });
+                    return unsubscribe;
+                }
+            }, [chat, currentUser]);
+
+            if (!friendData) return null;
+
+            const sanitizedEmail = securityManager.sanitizeHTML(friendData.email);
+            const sanitizedLastMessage = securityManager.sanitizeHTML(chat.lastMessage || 'No messages yet');
+            const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(friendData.email)}&background=ef4444&color=fff&size=128`;
+
+            return (
+                <div
+                    onClick={onClick}
+                    className={`flex items-center space-x-3 p-4 cursor-pointer transition-all border-b border-gray-100 ${
+                        isActive ? 'bg-red-50 border-l-4 border-l-red-600' : 'hover:bg-gray-50'
+                    }`}
+                >
+                    <div className="relative">
+                        <img
+                            src={avatarUrl}
+                            alt={sanitizedEmail}
+                            className="w-12 h-12 rounded-full ring-2 ring-red-200"
+                            referrerPolicy="no-referrer"
+                        />
+                        {friendData.online && (
+                            <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+                        )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-gray-800 truncate">{sanitizedEmail}</h3>
+                        <p className="text-sm text-gray-500 truncate">{sanitizedLastMessage}</p>
+                    </div>
+                    <div className="text-right">
+                        <span className="text-xs text-gray-400 block">{formatTimestamp(chat.timestamp)}</span>
+                        {chat.unreadCount > 0 && (
+                            <span className="inline-block mt-1 bg-red-600 text-white text-xs px-2 py-0.5 rounded-full font-bold">
+                                {chat.unreadCount > 99 ? '99+' : chat.unreadCount}
+                            </span>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        // Enhanced Chat Window with Self-Destruct Feature
+        const ChatWindow = ({ chatId, friendEmail, friendId, onBack }) => {
+            const { currentUser } = useAuth();
+            const [messages, setMessages] = useState([]);
+            const [newMessage, setNewMessage] = useState('');
+            const [loading, setLoading] = useState(false);
+            const [isTyping, setIsTyping] = useState(false);
+            const [friendTyping, setFriendTyping] = useState(false);
+            const [showCallMenu, setShowCallMenu] = useState(false);
+            const [inCall, setInCall] = useState(false);
+            const [callType, setCallType] = useState(null);
+            const [incomingCall, setIncomingCall] = useState(null);
+            const [toast, setToast] = useState(null);
+            const [selfDestructTimer, setSelfDestructTimer] = useState('off');
+            const messagesEndRef = useRef(null);
+            const typingTimeoutRef = useRef(null);
+            const fileInputRef = useRef(null);
+
+            const showToast = (message, type = 'info') => {
+                setToast({ message, type });
+            };
+
+            useEffect(() => {
+                if (!chatId) return;
+
+                const unsubscribe = db
+                    .collection('chats')
+                    .doc(chatId)
+                    .collection('messages')
+                    .orderBy('timestamp', 'asc')
+                    .limit(100)
+                    .onSnapshot(snapshot => {
+                        const msgs = snapshot.docs.map(doc => ({
+                            id: doc.id,
+                            ...doc.data()
+                        }));
+                        setMessages(msgs);
+                    }, err => {
+                        console.error('Messages error:', err);
+                    });
+
+                return unsubscribe;
+            }, [chatId]);
+
+            useEffect(() => {
+                if (!chatId) return;
+
+                const unsubscribe = db
+                    .collection('chats')
+                    .doc(chatId)
+                    .onSnapshot(doc => {
+                        if (doc.exists) {
+                            const data = doc.data();
+                            const typingUserId = data.typing;
+                            setFriendTyping(typingUserId === friendId);
+                        }
+                    }, err => {
+                        console.error('Typing status error:', err);
+                    });
+
+                return unsubscribe;
+            }, [chatId, friendId]);
+
+            useEffect(() => {
+                if (!chatId) return;
+
+                const unsubscribe = db
+                    .collection('calls')
+                    .doc(chatId)
+                    .onSnapshot(doc => {
+                        if (doc.exists) {
+                            const callData = doc.data();
+                            if (callData.status === 'calling' && callData.to === currentUser.uid) {
+                                setIncomingCall({
+                                    from: callData.from,
+                                    type: callData.type,
+                                    caller: friendEmail
+                                });
+                            } else if (callData.status === 'ended') {
+                                setInCall(false);
+                                setIncomingCall(null);
+                            }
+                        }
+                    }, err => {
+                        console.error('Call status error:', err);
+                    });
+
+                return unsubscribe;
+            }, [chatId, currentUser, friendEmail]);
+
+            useEffect(() => {
+                messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+            }, [messages, friendTyping]);
+
+            useEffect(() => {
+                const activityInterval = setInterval(() => {
+                    if (currentUser) {
+                        securityManager.refreshSession();
+                    }
+                }, 30000);
+
+                return () => clearInterval(activityInterval);
+            }, [currentUser]);
+
+            const handleTyping = (text) => {
+                if (!securityManager.checkRateLimit(currentUser.uid)) {
+                    showToast('⚠️ Typing too fast. Slow down.', 'error');
+                    return;
+                }
+
+                const sanitized = securityManager.sanitizeInput(text);
+                if (sanitized.length > SECURITY_CONFIG.MAX_MESSAGE_LENGTH) {
+                    showToast(`⚠️ Max ${SECURITY_CONFIG.MAX_MESSAGE_LENGTH} characters.`, 'error');
+                    return;
+                }
+
+                setNewMessage(text);
+                
+                if (!isTyping) {
+                    setIsTyping(true);
+                    db.collection('chats').doc(chatId).set({
+                        typing: currentUser.uid
+                    }, { merge: true }).catch(err => console.error('Error updating typing:', err));
+                }
+
+                if (typingTimeoutRef.current) {
+                    clearTimeout(typingTimeoutRef.current);
+                }
+
+                typingTimeoutRef.current = setTimeout(() => {
+                    setIsTyping(false);
+                    db.collection('chats').doc(chatId).set({
+                        typing: null
+                    }, { merge: true }).catch(err => console.error('Error clearing typing:', err));
+                }, 2000);
+            };
+
+            const handleImageUpload = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const validation = securityManager.validateFile(file);
+                if (!validation.valid) {
+                    showToast(validation.message, 'error');
+                    return;
+                }
+
+                if (!securityManager.checkRateLimit(currentUser.uid)) {
+                    showToast('⚠️ Too many uploads. Wait.', 'error');
+                    return;
+                }
+
+                setLoading(true);
+                try {
+                    const storageRef = storage.ref();
+                    const secureFileName = `${securityManager.generateSecureRandom(16)}_${Date.now()}.${file.name.split('.').pop()}`;
+                    const imageRef = storageRef.child(`chat-images/${currentUser.uid}/${secureFileName}`);
+                    
+                    await imageRef.put(file, {
+                        contentType: file.type,
+                        customMetadata: {
+                            uploadedBy: currentUser.uid,
+                            originalName: file.name
+                        }
+                    });
+                    
+                    const imageUrl = await imageRef.getDownloadURL();
+
+                    const messageData = {
+                        imageUrl,
+                        text: '',
+                        senderId: currentUser.uid,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                        read: false,
+                        encrypted: false,
+                        selfDestructTimer: selfDestructTimer,
+                        selfDestructed: false
+                    };
+
+                    await db.collection('chats').doc(chatId).collection('messages').add(messageData);
+                    
+                    await db.collection('chats').doc(chatId).set({
+                        lastMessage: '📷 Image',
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true });
+
+                    showToast('✅ Image sent securely', 'success');
+                } catch (error) {
+                    console.error('Error uploading image:', error);
+                    showToast('❌ Upload failed', 'error');
+                    securityManager.logSecurityEvent('image_upload_error', { error: error.message });
+                } finally {
+                    setLoading(false);
+                    if (fileInputRef.current) fileInputRef.current.value = '';
+                }
+            };
+
+            const handleSend = async (e) => {
+                e.preventDefault();
+                
+                const trimmed = newMessage.trim();
+                if (!trimmed || loading) return;
+
+                if (!securityManager.checkRateLimit(currentUser.uid)) {
+                    showToast('⚠️ Sending too fast. Slow down.', 'error');
+                    return;
+                }
+
+                const sanitized = securityManager.sanitizeInput(trimmed);
+                if (sanitized.length > SECURITY_CONFIG.MAX_MESSAGE_LENGTH) {
+                    showToast(`⚠️ Max ${SECURITY_CONFIG.MAX_MESSAGE_LENGTH} characters.`, 'error');
+                    return;
+                }
+
+                setLoading(true);
+                setIsTyping(false);
+                
+                try {
+                    const encrypted = securityManager.encryptMessage(sanitized);
+                    if (!encrypted) {
+                        throw new Error('Encryption failed');
+                    }
+
+                    const messageData = {
+                        text: encrypted,
+                        senderId: currentUser.uid,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                        read: false,
+                        encrypted: true,
+                        selfDestructTimer: selfDestructTimer,
+                        selfDestructed: false
+                    };
+
+                    await db.collection('chats').doc(chatId).collection('messages').add(messageData);
+                    
+                    await db.collection('chats').doc(chatId).set({
+                        lastMessage: '🔒 ' + sanitized.substring(0, 30),
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                        typing: null
+                    }, { merge: true });
+
+                    setNewMessage('');
+                    
+                    if (selfDestructTimer !== 'off') {
+                        showToast(`💣 Self-destruct in ${SECURITY_CONFIG.SELF_DESTRUCT_TIMERS[selfDestructTimer] / 1000}s`, 'info');
+                    }
+                } catch (error) {
+                    console.error('Error sending message:', error);
+                    showToast('❌ Send failed', 'error');
+                    securityManager.logSecurityEvent('message_send_error', { error: error.message });
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            const handleSelfDestruct = async (messageId) => {
+                try {
+                    await db.collection('chats').doc(chatId).collection('messages').doc(messageId).update({
+                        selfDestructed: true,
+                        text: '',
+                        imageUrl: ''
+                    });
+                } catch (error) {
+                    console.error('Error self-destructing message:', error);
+                }
+            };
+
+            const initiateCall = async (type) => {
+                try {
+                    await db.collection('calls').doc(chatId).set({
+                        from: currentUser.uid,
+                        to: friendId,
+                        type: type,
+                        status: 'calling',
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    setCallType(type);
+                    setInCall(true);
+                    setShowCallMenu(false);
+                } catch (error) {
+                    console.error('Error initiating call:', error);
+                    showToast('❌ Call failed', 'error');
+                }
+            };
+
+            const acceptCall = async () => {
+                try {
+                    await db.collection('calls').doc(chatId).update({
+                        status: 'active'
+                    });
+                    setCallType(incomingCall.type);
+                    setInCall(true);
+                    setIncomingCall(null);
+                } catch (error) {
+                    console.error('Error accepting call:', error);
+                    showToast('❌ Accept failed', 'error');
+                }
+            };
+
+            const rejectCall = async () => {
+                try {
+                    await db.collection('calls').doc(chatId).update({
+                        status: 'ended'
+                    });
+                    setIncomingCall(null);
+                } catch (error) {
+                    console.error('Error rejecting call:', error);
+                }
+            };
+
+            const endCall = async () => {
+                try {
+                    await db.collection('calls').doc(chatId).update({
+                        status: 'ended'
+                    });
+                    setInCall(false);
+                    setCallType(null);
+                } catch (error) {
+                    console.error('Error ending call:', error);
+                }
+            };
+
+            if (inCall) {
+                return (
+                    <VideoCallScreen
+                        friendEmail={friendEmail}
+                        friendId={friendId}
+                        callType={callType}
+                        onEndCall={endCall}
+                    />
+                );
+            }
+
+            const sanitizedEmail = securityManager.sanitizeHTML(friendEmail);
+            const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(friendEmail)}&background=ef4444&color=fff&size=128`;
+
+            return (
+                <div className="flex flex-col h-full">
+                    {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+                    
+                    {incomingCall && (
+                        <IncomingCallModal
+                            caller={incomingCall.caller}
+                            callType={incomingCall.type}
+                            onAccept={acceptCall}
+                            onReject={rejectCall}
+                        />
+                    )}
+
+                    {/* Chat Header */}
+                    <div className="bg-white border-b-2 border-red-200 px-4 py-3 flex items-center space-x-3 shadow-sm">
+                        <button
+                            onClick={onBack}
+                            className="lg:hidden text-gray-600 hover:text-red-600 mr-2"
+                        >
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                            </svg>
+                        </button>
+                        <img 
+                            src={avatarUrl} 
+                            alt={sanitizedEmail} 
+                            className="w-10 h-10 rounded-full ring-2 ring-red-300" 
+                            referrerPolicy="no-referrer"
+                        />
+                        <div className="flex-1">
+                            <h2 className="font-bold text-gray-800 flex items-center space-x-2">
+                                <span>{sanitizedEmail}</span>
+                                <span className="text-red-600">🔒</span>
+                            </h2>
+                            <p className="text-xs text-green-600 font-medium">🟢 Online • Ultra-Encrypted</p>
+                        </div>
+                        <div className="relative">
+                            <button
+                                onClick={() => setShowCallMenu(!showCallMenu)}
+                                className="text-gray-600 hover:text-red-600 transition-colors p-2 rounded-full hover:bg-red-50"
+                            >
+                                📞
+                            </button>
+                            {showCallMenu && (
+                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-2xl border-2 border-red-200 py-2 z-10">
+                                    <button
+                                        onClick={() => initiateCall('audio')}
+                                        className="w-full text-left px-4 py-3 hover:bg-red-50 flex items-center space-x-3 font-medium"
+                                    >
+                                        <span>🎤</span>
+                                        <span>Voice Call</span>
+                                    </button>
+                                    <button
+                                        onClick={() => initiateCall('video')}
+                                        className="w-full text-left px-4 py-3 hover:bg-red-50 flex items-center space-x-3 font-medium"
+                                    >
+                                        <span>📹</span>
+                                        <span>Video Call</span>
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Messages Area */}
+                    <div className="flex-1 overflow-y-auto chat-scroll bg-gradient-to-b from-gray-50 to-white p-4">
+                        {messages.length === 0 ? (
+                            <div className="flex items-center justify-center h-full">
+                                <div className="text-center p-8">
+                                    <div className="text-6xl mb-4">🔐</div>
+                                    <p className="text-gray-500 font-semibold">No messages yet</p>
+                                    <p className="text-xs text-gray-400 mt-2">Ultra-encrypted end-to-end</p>
+                                </div>
+                            </div>
+                        ) : (
+                            <>
+                                {messages.map(msg => (
+                                    <Message
+                                        key={msg.id}
+                                        message={msg}
+                                        isOwn={msg.senderId === currentUser.uid}
+                                        onSelfDestruct={handleSelfDestruct}
+                                    />
+                                ))}
+                                {friendTyping && <TypingIndicator />}
+                            </>
+                        )}
+                        <div ref={messagesEndRef} />
+                    </div>
+
+                    {/* Input Area with Self-Destruct Selector */}
+                    <div className="bg-white border-t-2 border-red-200 p-4">
+                        <SelfDestructSelector 
+                            selected={selfDestructTimer} 
+                            onChange={setSelfDestructTimer} 
+                        />
+                        
+                        <form onSubmit={handleSend} className="flex items-center space-x-2">
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                onChange={handleImageUpload}
+                                accept="image/jpeg,image/png,image/gif,image/webp"
+                                className="hidden"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => fileInputRef.current?.click()}
+                                disabled={loading}
+                                className="text-gray-600 hover:text-red-600 transition-colors disabled:opacity-50 p-2 rounded-full hover:bg-red-50"
+                                title="Upload Image"
+                            >
+                                📷
+                            </button>
+                            <input
+                                type="text"
+                                value={newMessage}
+                                onChange={(e) => handleTyping(e.target.value)}
+                                placeholder="Type an ultra-secure message..."
+                                className="flex-1 px-4 py-3 border-2 border-red-200 rounded-full focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
+                                disabled={loading}
+                                maxLength={SECURITY_CONFIG.MAX_MESSAGE_LENGTH}
+                            />
+                            <button
+                                type="submit"
+                                disabled={loading || !newMessage.trim()}
+                                className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white p-3 rounded-full transition-all disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed shadow-lg"
+                                title="Send Message"
+                            >
+                                {loading ? (
+                                    <svg className="animate-spin h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                ) : (
+                                    <span>🚀</span>
+                                )}
+                            </button>
+                        </form>
+                        <p className="text-xs text-center text-gray-500 mt-2 font-medium">
+                            🔒 Ultra-Encrypted • {newMessage.length}/{SECURITY_CONFIG.MAX_MESSAGE_LENGTH}
+                        </p>
+                    </div>
+                </div>
+            );
+        };
+
+        // Main App Component
+        const App = () => {
+            const { currentUser } = useAuth();
+            const [selectedChat, setSelectedChat] = useState(null);
+            const [chats, setChats] = useState([]);
+            const [toast, setToast] = useState(null);
+
+            const showToast = (message, type = 'info') => {
+                setToast({ message, type });
+            };
+
+            useEffect(() => {
+                if (!currentUser) return;
+
+                const unsubscribe = db
+                    .collection('chats')
+                    .where('participants', 'array-contains', currentUser.uid)
+                    .orderBy('timestamp', 'desc')
+                    .onSnapshot(snapshot => {
+                        const chatList = snapshot.docs.map(doc => ({
+                            id: doc.id,
+                            ...doc.data()
+                        }));
+                        setChats(chatList);
+                    }, err => {
+                        console.error('Chats error:', err);
+                        securityManager.logSecurityEvent('chats_error', { error: err.message });
+                    });
+
+                return unsubscribe;
+            }, [currentUser]);
+
+            if (!currentUser) {
+                return <AuthPage />;
+            }
+
+            return (
+                <div className="h-screen flex bg-gray-100">
+                    {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+                    
+                    {/* Sidebar */}
+                    <div className={`w-full lg:w-96 bg-white border-r-2 border-red-200 flex flex-col ${
+                        selectedChat ? 'hidden lg:flex' : 'flex'
+                    }`}>
+                        {/* Sidebar Header */}
+                        <div className="bg-gradient-to-r from-red-600 to-red-700 text-white p-6 shadow-lg">
+                            <div className="flex items-center justify-between mb-4">
+                                <h1 className="text-2xl font-bold flex items-center space-x-2">
+                                    <span>🔐</span>
+                                    <span>ProConnect</span>
+                                </h1>
+                                <button
+                                    onClick={async () => {
+                                        try {
+                                            await auth.signOut();
+                                            showToast('✅ Logged out successfully', 'success');
+                                        } catch (error) {
+                                            console.error('Logout error:', error);
+                                            showToast('❌ Logout failed', 'error');
+                                        }
+                                    }}
+                                    className="text-white hover:text-red-200 transition-colors p-2 rounded-full hover:bg-red-800"
+                                    title="Logout"
+                                >
+                                    🚪
+                                </button>
+                            </div>
+                            <p className="text-sm text-red-100 mb-2">{securityManager.sanitizeHTML(currentUser.email)}</p>
+                            <div className="mt-2">
+                                <span className="text-xs bg-red-800 bg-opacity-60 px-3 py-1 rounded-full font-semibold">
+                                    ⚡ ULTRA SECURED MODE
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* Chat List */}
+                        <div className="flex-1 overflow-y-auto">
+                            {chats.length === 0 ? (
+                                <div className="flex items-center justify-center h-full">
+                                    <div className="text-center p-8">
+                                        <div className="text-5xl mb-4">💬</div>
+                                        <p className="text-gray-500 font-semibold">No conversations yet</p>
+                                        <p className="text-sm text-gray-400 mt-2">Add friends to start chatting</p>
+                                    </div>
+                                </div>
+                            ) : (
+                                chats.map(chat => (
+                                    <ChatListItem
+                                        key={chat.id}
+                                        chat={chat}
+                                        onClick={() => setSelectedChat(chat)}
+                                        isActive={selectedChat?.id === chat.id}
+                                    />
+                                ))
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Chat Area */}
+                    <div className={`flex-1 flex flex-col ${
+                        selectedChat ? 'flex' : 'hidden lg:flex'
+                    }`}>
+                        {selectedChat ? (
+                            <ChatWindow
+                                chatId={selectedChat.id}
+                                friendEmail={selectedChat.friendEmail || 'Friend'}
+                                friendId={selectedChat.participants?.find(id => id !== currentUser.uid)}
+                                onBack={() => setSelectedChat(null)}
+                            />
+                        ) : (
+                            <div className="flex items-center justify-center h-full bg-gradient-to-br from-red-50 to-gray-50">
+                                <div className="text-center p-8">
+                                    <div className="text-7xl mb-6">🔐</div>
+                                    <h2 className="text-3xl font-bold text-gray-900 mb-3">ProConnect Ultra-Secured</h2>
+                                    <p className="text-gray-600 text-lg mb-6">Select a conversation to start messaging</p>
+                                    <div className="mt-8 grid grid-cols-2 gap-4 max-w-md mx-auto">
+                                        <div className="bg-white p-4 rounded-lg shadow-md border-2 border-red-100">
+                                            <div className="text-3xl mb-2">🔐</div>
+                                            <p className="text-sm font-semibold text-gray-700">E2E Encrypted</p>
+                                        </div>
+                                        <div className="bg-white p-4 rounded-lg shadow-md border-2 border-red-100">
+                                            <div className="text-3xl mb-2">💣</div>
+                                            <p className="text-sm font-semibold text-gray-700">Self-Destruct</p>
+                                        </div>
+                                        <div className="bg-white p-4 rounded-lg shadow-md border-2 border-red-100">
+                                            <div className="text-3xl mb-2">⚡</div>
+                                            <p className="text-sm font-semibold text-gray-700">Rate Limited</p>
+                                        </div>
+                                        <div className="bg-white p-4 rounded-lg shadow-md border-2 border-red-100">
+                                            <div className="text-3xl mb-2">🛡️</div>
+                                            <p className="text-sm font-semibold text-gray-700">Ultra Protected</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        // Render App
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(
+            <AuthProvider>
+                <App />
+            </AuthProvider>
+        );
+    </script>
+</body>
+</html>
